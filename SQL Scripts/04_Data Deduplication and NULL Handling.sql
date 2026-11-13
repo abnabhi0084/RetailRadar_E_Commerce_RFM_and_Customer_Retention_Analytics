@@ -1,4 +1,4 @@
--- REMOVE DUPLICATES AND CREATE FINAL CLEANED TABLE
+-- REMOVE DUPLICATES,NULL and NEGATIVE or ZERO PRICE HANDLING AND CREATE FINAL CLEANED TABLE
 
 USE CustomerAnalytics;
 GO
@@ -32,6 +32,7 @@ WITH Deduped AS
         ) AS RowNum
 
     FROM dbo.RetailCombined
+    WHERE Customer_ID IS NOT NULL AND Price > 0 AND Quantity > 0
 )
 
 SELECT
@@ -90,4 +91,11 @@ SELECT
     SUM(CASE WHEN Price IS NULL THEN 1 ELSE 0 END) AS Null_Price,
     SUM(CASE WHEN Customer_ID IS NULL THEN 1 ELSE 0 END) AS Null_CustomerID,
     SUM(CASE WHEN Country IS NULL THEN 1 ELSE 0 END) AS Null_Country
+FROM dbo.RetailCleaned;
+
+--Quantity and Price Validaton
+SELECT
+    COUNT(*) AS Total_Rows,
+    SUM(CASE WHEN Quantity <= 0 THEN 1 ELSE 0 END) AS Invalid_Quantity,
+    SUM(CASE WHEN Price <= 0 THEN 1 ELSE 0 END) AS Invalid_Price
 FROM dbo.RetailCleaned;
